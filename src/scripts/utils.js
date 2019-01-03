@@ -3,7 +3,7 @@ const {
 } = require('electron').remote;
 var fs = require('fs');
 var path = require('path');
-const nodeID3 = require('node-id3');
+var mm = require('musicmetadata');
 
 exports.browseFolder = function () {
     const folders = dialog.showOpenDialog({
@@ -42,5 +42,13 @@ exports.getFiles = function (dir, filelist) {
 };
 
 exports.readId3 = function (file) {
-    return nodeID3.read(file);
+    return new Promise(function (resolve, reject) {
+        mm(fs.createReadStream(file), function (err, metadata) {
+            if (err)
+                reject(err);
+            else {
+                resolve(metadata);
+            }
+        });
+    });
 };

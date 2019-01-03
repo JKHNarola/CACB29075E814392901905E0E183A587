@@ -1,9 +1,17 @@
 ﻿app.controller('mainCtrl', function ($scope, $interval, $rootScope, player, snackbar, messagebox) {
+    const utils = require(__dirname + "/scripts/utils");
     $scope.isPlaying = false;
     $scope.currPos = 0;
     $scope.duration = 0;
+    $scope.title = "";
+    $scope.album = "";
+    $scope.artists = "";
+    $scope.coverpic = "";
     $scope.seekbarStyle = {
         'width': '0%'
+    };
+    $scope.volumeStyle = {
+        'width': '100%'
     };
 
     var registerOnDurationChanged;
@@ -13,7 +21,24 @@
         });
 
         player.pickFiles();
+        onSongChange();
         $scope.startSeekbar();
+    };
+
+    var onSongChange = function () {
+        if (player.nowplaying.length > 0) {
+            $scope.isPlaying = true;
+            utils.readId3(player.nowplaying[player.currIndex]).then(function (d) {
+                console.log(d);
+                $scope.title = d.title;
+                $scope.album = d.album;
+                $scope.artists = d.artist.join(", ");
+                if (d.picture && d.picture.length > 0)
+                    $scope.coverpic = "data:image/png;base64," + Buffer.from(d.picture[0].data).toString('base64');
+            }).catch(function (e) {
+                console.log(e)
+            });
+        }
     };
 
     $scope.onPlayPause = function () {
@@ -24,11 +49,13 @@
     $scope.onNext = function () {
         player.playNext();
         $scope.isPlaying = player.isPlaying;
+        onSongChange();
     };
 
     $scope.onPrev = function () {
         player.playPrev();
         $scope.isPlaying = player.isPlaying;
+        onSongChange();
     };
 
     var updateSeekbar;
@@ -43,7 +70,7 @@
                     'width': per.toString() + "%"
                 };
             }
-        }, 100);
+        }, 250);
     };
 
     $scope.stopSeekbar = function () {
@@ -58,8 +85,18 @@
         var w = e.target.offsetWidth;
         var d = player.getDuration();
         var s = (d / w) * x;
-        console.log(s);
         player.seek(s);
+    };
+
+    $scope.onVolumeChange = function (e) {
+        var x = e.offsetX;
+        var w = e.target.offsetWidth;
+        var s = (1 / w) * x;
+        player.setVolume(s);
+        var per = (100 / 1) * player.getVolume();
+        $scope.volumeStyle = {
+            'width': per.toString() + "%"
+        };
     };
 
     this.$onDestroy = function () {

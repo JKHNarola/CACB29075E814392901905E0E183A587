@@ -13,15 +13,38 @@
 
 <body>
     <main role="main" class="container-fluid" ng-controller="mainCtrl" ng-init="onInit()">
-        <div class="row mt-2">
-            <div class="col-sm-12">
-                <button type="button" class="btn btn-primary" ng-click="onPrev();">Prev</button>
-                <button type="button" class="btn btn-primary" ng-click="onPlayPause();">Play/Pause</button>
-                <button type="button" class="btn btn-primary" ng-click="onNext();">Next</button>
+        <div class="row">
+            <div class="col-3 sidebar">
+                <img class="cover-pic" ng-src="{{coverpic}}" />
+            </div>
+            <div class="col-9 content-area">
+
             </div>
         </div>
-        <div class="progress mt-2" style="height:5px; cursor: pointer;" ng-click="onSeek($event)">
-            <div class="progress-bar progress-bar-striped progress-bar-animated" ng-style="seekbarStyle"></div>
+        <div class="row">
+            <div class="col-12 audio-info">
+                <span>{{title}}</span>&nbsp; <span><i>{{album}}</i></span>
+            </div>
+        </div>
+        <div class="row player-area">
+            <div class="col-2 my-auto">
+                <button class="player-button play-pause" type="button" ng-click="onPrev()">
+                    <i class="zmdi zmdi-skip-previous"></i>
+                </button>
+                <button class="player-button play-pause" type="button" ng-click="onPlayPause()">
+                    <i ng-if="isPlaying" class="zmdi zmdi-pause-circle"></i>
+                    <i ng-if="!isPlaying" class="zmdi zmdi-play-circle"></i>
+                </button>
+                <button class="player-button play-pause" type="button" ng-click="onNext()">
+                    <i class="zmdi zmdi-skip-next"></i>
+                </button>
+            </div>
+            <div class="col-5 progress my-auto p-0" style="height:7px; cursor: pointer;" ng-click="onSeek($event)">
+                <div class="progress-bar bg-dark" ng-style="seekbarStyle"></div>
+            </div>
+            <div class="col-1 progress my-auto p-0 ml-4" style="height:5px; cursor: pointer;" ng-click="onVolumeChange($event)">
+                <div class="progress-bar bg-dark" ng-style="volumeStyle"></div>
+            </div>
         </div>
     </main>
     <script>

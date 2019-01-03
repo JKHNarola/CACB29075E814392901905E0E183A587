@@ -484,6 +484,15 @@ app.factory("player", function ($rootScope) {
         if (player.sound) player.sound.seek(s);
     }
 
+    player.getVolume = function () {
+        if (player.sound) return player.sound.volume();
+        return 0;
+    }
+
+    player.setVolume = function (value) {
+        if (player.sound) player.sound.volume(value);
+    }
+
     return player;
 });
 //#endregion factories
