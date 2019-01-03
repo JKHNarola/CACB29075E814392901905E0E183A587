@@ -40,10 +40,10 @@
                 $scope.currPos = player.getCurrpos();
                 var per = (100 / $scope.duration) * $scope.currPos;
                 $scope.seekbarStyle = {
-                    'width': per.toString()
+                    'width': per.toString() + "%"
                 };
             }
-        }, 500);
+        }, 100);
     };
 
     $scope.stopSeekbar = function () {
@@ -51,6 +51,15 @@
             $interval.cancel(updateSeekbar);
             updateSeekbar = undefined;
         }
+    };
+
+    $scope.onSeek = function (e) {
+        var x = e.offsetX;
+        var w = e.target.offsetWidth;
+        var d = player.getDuration();
+        var s = (d / w) * x;
+        console.log(s);
+        player.seek(s);
     };
 
     this.$onDestroy = function () {

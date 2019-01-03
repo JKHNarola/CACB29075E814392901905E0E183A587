@@ -20,8 +20,8 @@
                 <button type="button" class="btn btn-primary" ng-click="onNext();">Next</button>
             </div>
         </div>
-        <div class="progress">
-            <div class="progress-bar" ng-style="seekbarStyle"></div>
+        <div class="progress mt-2" style="height:5px; cursor: pointer;" ng-click="onSeek($event)">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" ng-style="seekbarStyle"></div>
         </div>
     </main>
     <script>

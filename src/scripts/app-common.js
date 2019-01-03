@@ -393,6 +393,7 @@ app.factory("player", function ($rootScope) {
     } = require('howler');
     const utils = require(__dirname + "/scripts/utils");
 
+    var tmpCurrId = 0;
     var player = {};
     player.nowplaying = [];
     player.sound;
@@ -434,7 +435,7 @@ app.factory("player", function ($rootScope) {
                 player.sound.pause();
                 player.isPlaying = false;
             } else {
-                player.sound.play();
+                tmpCurrId = player.sound.play();
                 player.isPlaying = true;
             }
         }
@@ -477,6 +478,10 @@ app.factory("player", function ($rootScope) {
             if (typeof x == 'number') return x;
         }
         return 0;
+    }
+
+    player.seek = function (s) {
+        if (player.sound) player.sound.seek(s);
     }
 
     return player;
