@@ -1,0 +1,47 @@
+﻿<!DOCTYPE html>
+<html lang="en" ng-app="app">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Electorn App</title>
+    <link rel="stylesheet" href="styles/material-iconic-font.min.css" />
+    <link rel="stylesheet" href="styles/animate.min.css" />
+    <link rel="stylesheet" href="styles/bootstrap.min.css" />
+    <link rel="stylesheet" href="styles/style.css" />
+    <link rel="stylesheet" href="styles/snb.css" />
+</head>
+
+<body>
+    <main role="main" class="container-fluid" ng-controller="mainCtrl" ng-init="onInit()">
+        <div class="row mt-2">
+            <div class="col-sm-12">
+                <button type="button" class="btn btn-primary" ng-click="onPrev();">Prev</button>
+                <button type="button" class="btn btn-primary" ng-click="onPlayPause();">Play/Pause</button>
+                <button type="button" class="btn btn-primary" ng-click="onNext();">Next</button>
+            </div>
+        </div>
+        <div class="progress">
+            <div class="progress-bar" ng-style="seekbarStyle"></div>
+        </div>
+    </main>
+    <script>
+        if (typeof module === 'object') {
+            window.module = module;
+            module = undefined;
+        }
+    </script>
+    <script src="scripts/bs/jquery.min.js"></script>
+    <script>
+        if (window.module) module = window.module;
+    </script>
+    <script src="scripts/bs/popper.min.js"></script>
+    <script src="scripts/bs/bootstrap.min.js"></script>
+    <script src="scripts/angular/angular.min.js"></script>
+    <script src="scripts/angular/angular.animate.min.js"></script>
+    <script src="scripts/angular/angular.sanitize.min.js"></script>
+    <script src="scripts/bs/ui-bootstrap.tpls.min.js"></script>
+    <script src="scripts/app-common.js"></script>
+    <script src="scripts/controllers/main-controller.js"></script>
+</body>
+
+</html>

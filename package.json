@@ -1,0 +1,23 @@
+{
+  "name": "electron-player",
+  "version": "1.0.0",
+  "description": "An Electron Music Player",
+  "main": "src/electron-main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [
+    "Electron",
+    "Player",
+    "Electron Player"
+  ],
+  "author": "Jigar Khanpara",
+  "dependencies": {
+    "howler": "^2.1.1",
+    "moment": "^2.22.2",
+    "node-id3": "^0.1.7"
+  },
+  "devDependencies": {
+    "electron": "^4.0.0"
+  }
+}
