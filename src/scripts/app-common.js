@@ -2,12 +2,66 @@
 
 //#region factories
 app.factory('appUtils', function () {
+    const {
+        dialog
+    } = require('electron').remote;
+    var fs = require('fs');
+    var path = require('path');
+    var mm = require('musicmetadata');
+
     var obj = {};
 
     obj.onChanges = function (changes, property) {
         return changes[property] && changes[property].currentValue && changes[property].currentValue !== changes[property].previousValue;
     };
 
+    obj.browseFolder = function () {
+        const folders = dialog.showOpenDialog({
+            title: 'Choose folder',
+            properties: ['openDirectory']
+        });
+        if (!folders) return null;
+        return folders;
+    };
+
+    obj.getFilesFromFolder = function (folder) {
+        var finalFiles = [];
+        if (!folder) {
+            var folders = this.browseFolder();
+            if (!folders) return finalFiles;
+            folder = folders[0];
+        }
+        var files = this.getFiles(folder);
+        files.forEach(function (x) {
+            if (path.extname(x).toLowerCase() === ".mp3") finalFiles.push(x);
+        });
+        return finalFiles;
+    };
+
+    obj.getFiles = function (dir, filelist) {
+        files = fs.readdirSync(dir);
+        filelist = filelist || [];
+        files.forEach(function (file) {
+            if (fs.statSync(path.join(dir, file)).isDirectory()) {
+                filelist = obj.getFiles(path.join(dir, file), filelist);
+            } else {
+                filelist.push(path.join(dir, file));
+            }
+        });
+        return filelist;
+    };
+
+    obj.readId3 = function (file) {
+        return new Promise(function (resolve, reject) {
+            mm(fs.createReadStream(file), function (err, metadata) {
+                if (err)
+                    reject(err);
+                else {
+                    resolve(metadata);
+                }
+            });
+        });
+    };
     return obj;
 });
 
@@ -65,7 +119,7 @@ app.factory("messagebox", function ($uibModal) {
                 vm.content = config.content;
                 vm.showIcon = config.showIcon ? config.showIcon : true;
 
-                vm.onInit = function () {};
+                vm.onInit = function () { };
 
                 vm.closePopup = function (t) {
                     $uibModalInstance.close(t);
@@ -308,12 +362,12 @@ app.factory("snackbar", function () {
             if (f) $("#" + snbid).fadeOut("fast", null, function () {
                 $(this).remove();
             });
-            if (config.retryCallback) config.retryCallback = function () {};
+            if (config.retryCallback) config.retryCallback = function () { };
             if (config.closeCallback) config.closeCallback();
         };
 
         var closeAndRetry = function () {
-            config.closeCallback = function () {};
+            config.closeCallback = function () { };
             $("#" + snbid).fadeOut("fast", null, function () {
                 $(this).remove();
             });
@@ -387,12 +441,10 @@ app.factory("snackbar", function () {
     return obj;
 });
 
-app.factory("player", function ($rootScope) {
+app.factory("player", function ($rootScope, appUtils) {
     const {
-        Howl
+        Howl, Howler
     } = require('howler');
-    const utils = require(__dirname + "/scripts/utils");
-
     var tmpCurrId = 0;
     var player = {};
     player.nowplaying = [];
@@ -402,7 +454,7 @@ app.factory("player", function ($rootScope) {
     player.isPlaying = false;
 
     player.pickFiles = function () {
-        var files = utils.getFilesFromFolder();
+        var files = appUtils.getFilesFromFolder();
 
         if (files) {
             player.nowplaying = files;
@@ -411,6 +463,16 @@ app.factory("player", function ($rootScope) {
         player.open(player.currIndex);
     };
 
+    var analyser;
+    var dataArray;
+    var bufferLength;
+    var WIDTH;
+    var HEIGHT;
+    var barWidth;
+    var barHeight;
+    var x;
+    var canvas;
+    var ctx;
     player.open = function (index) {
         if (player.sound) player.sound.unload();
         player.sound = undefined;
@@ -425,8 +487,49 @@ app.factory("player", function ($rootScope) {
                 $rootScope.$emit("onDurationChanged", this.duration());
             }
         });
+
+        canvas = document.getElementById("canvas");
+        ctx = canvas.getContext("2d");
+
+        analyser = Howler.ctx.createAnalyser();
+        Howler.masterGain.connect(analyser);
+        bufferLength = analyser.frequencyBinCount / 8;
+        dataArray = new Uint8Array(bufferLength);
+        analyser.getByteTimeDomainData(dataArray);
+
+        analyser.fftSize = 256;
+        WIDTH = canvas.width;
+        HEIGHT = canvas.height;
+
+        barWidth = (WIDTH / bufferLength) * 2.5;
+
         player.sound.play();
         player.isPlaying = true;
+        renderFrame();
+    };
+
+    var renderFrame = function () {
+        requestAnimationFrame(renderFrame);
+
+        x = 0;
+
+        analyser.getByteFrequencyData(dataArray);
+
+        ctx.fillStyle = "#000";
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+        for (var i = 0; i < bufferLength; i++) {
+            barHeight = dataArray[i];
+
+            var r = barHeight + (25 * (i / bufferLength));
+            var g = 250 * (i / bufferLength);
+            var b = 50;
+
+            ctx.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
+            ctx.fillRect(x, HEIGHT - barHeight, barWidth, barHeight);
+
+            x += barWidth + 1;
+        }
     };
 
     player.playPause = function () {

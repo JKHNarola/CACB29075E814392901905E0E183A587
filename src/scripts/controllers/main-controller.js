@@ -1,5 +1,4 @@
-﻿app.controller('mainCtrl', function ($scope, $interval, $rootScope, player, snackbar, messagebox) {
-    const utils = require(__dirname + "/scripts/utils");
+﻿app.controller('mainCtrl', function ($scope, $interval, $rootScope, player, snackbar, messagebox, appUtils) {
     $scope.isPlaying = false;
     $scope.currPos = 0;
     $scope.duration = 0;
@@ -28,7 +27,7 @@
     var onSongChange = function () {
         if (player.nowplaying.length > 0) {
             $scope.isPlaying = true;
-            utils.readId3(player.nowplaying[player.currIndex]).then(function (d) {
+            appUtils.readId3(player.nowplaying[player.currIndex]).then(function (d) {
                 console.log(d);
                 $scope.title = d.title;
                 $scope.album = d.album;
