@@ -1,4 +1,4 @@
-﻿app.controller('mainCtrl', function ($scope, $interval, $rootScope, player, snackbar, messagebox, appUtils) {
+﻿app.controller('mainCtrl', function ($scope, $interval, $rootScope, player, snackbar, messagebox, appUtils, visualizer) {
     $scope.isPlaying = false;
     $scope.currPos = 0;
     $scope.duration = 0;
@@ -6,12 +6,7 @@
     $scope.album = "";
     $scope.artists = "";
     $scope.coverpic = "";
-    $scope.seekbarStyle = {
-        'width': '0%'
-    };
-    $scope.volumeStyle = {
-        'width': '100%'
-    };
+    $scope.volume = 0.5;
 
     var registerOnDurationChanged;
     $scope.onInit = function () {
@@ -28,7 +23,6 @@
         if (player.nowplaying.length > 0) {
             $scope.isPlaying = true;
             appUtils.readId3(player.nowplaying[player.currIndex]).then(function (d) {
-                console.log(d);
                 $scope.title = d.title;
                 $scope.album = d.album;
                 $scope.artists = d.artist.join(", ");
@@ -37,6 +31,8 @@
             }).catch(function (e) {
                 console.log(e)
             });
+
+            visualizer.start();
         }
     };
 
@@ -62,14 +58,10 @@
         if (angular.isDefined(updateSeekbar)) return;
 
         updateSeekbar = $interval(function () {
-            if (player.isPlaying) {
+            if (player.isPlaying && !$scope.isSeeking) {
                 $scope.currPos = player.getCurrpos();
-                var per = (100 / $scope.duration) * $scope.currPos;
-                $scope.seekbarStyle = {
-                    'width': per.toString() + "%"
-                };
             }
-        }, 250);
+        }, 1000);
     };
 
     $scope.stopSeekbar = function () {
@@ -79,23 +71,12 @@
         }
     };
 
-    $scope.onSeek = function (e) {
-        var x = e.offsetX;
-        var w = e.target.offsetWidth;
-        var d = player.getDuration();
-        var s = (d / w) * x;
-        player.seek(s);
+    $scope.onSeek = function (v) {
+        player.seek(v);
     };
 
-    $scope.onVolumeChange = function (e) {
-        var x = e.offsetX;
-        var w = e.target.offsetWidth;
-        var s = (1 / w) * x;
-        player.setVolume(s);
-        var per = (100 / 1) * player.getVolume();
-        $scope.volumeStyle = {
-            'width': per.toString() + "%"
-        };
+    $scope.onVolumeChange = function () {
+        player.setVolume($scope.volume);
     };
 
     this.$onDestroy = function () {

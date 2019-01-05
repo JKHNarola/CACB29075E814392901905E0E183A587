@@ -18,7 +18,7 @@
                 <img class="cover-pic" ng-src="{{coverpic}}" />
             </div>
             <div class="col-9 content-area">
-                <canvas id="canvas" height="300" width="600"></canvas>
+                <canvas id="canvas" height="180" width="500"></canvas>
             </div>
         </div>
         <div class="row">
@@ -27,7 +27,7 @@
             </div>
         </div>
         <div class="row player-area">
-            <div class="col-2 my-auto">
+            <div class="col-12 my-auto mx-auto">
                 <button class="player-button play-pause" type="button" ng-click="onPrev()">
                     <i class="zmdi zmdi-skip-previous"></i>
                 </button>
@@ -38,12 +38,9 @@
                 <button class="player-button play-pause" type="button" ng-click="onNext()">
                     <i class="zmdi zmdi-skip-next"></i>
                 </button>
-            </div>
-            <div class="col-5 progress my-auto p-0" style="height:7px; cursor: pointer;" ng-click="onSeek($event)">
-                <div class="progress-bar bg-dark" ng-style="seekbarStyle"></div>
-            </div>
-            <div class="col-1 progress my-auto p-0 ml-4" style="height:5px; cursor: pointer;" ng-click="onVolumeChange($event)">
-                <div class="progress-bar bg-dark" ng-style="volumeStyle"></div>
+                <input type="range" class="seekbar blue" min="{{0}}" max="{{duration}}" ng-model="currPos" ng-keyup="onSeek($event.target.value);$scope.isSeeking=false;"
+                    ng-keydown="$scope.isSeeking=true;"></input>
+                <input type="range" min="0.0" max="1.0" step="0.01" ng-model="volume" ng-change="onVolumeChange()"></input>
             </div>
         </div>
     </main>

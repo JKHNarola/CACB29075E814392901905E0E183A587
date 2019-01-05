@@ -119,7 +119,7 @@ app.factory("messagebox", function ($uibModal) {
                 vm.content = config.content;
                 vm.showIcon = config.showIcon ? config.showIcon : true;
 
-                vm.onInit = function () { };
+                vm.onInit = function () {};
 
                 vm.closePopup = function (t) {
                     $uibModalInstance.close(t);
@@ -362,12 +362,12 @@ app.factory("snackbar", function () {
             if (f) $("#" + snbid).fadeOut("fast", null, function () {
                 $(this).remove();
             });
-            if (config.retryCallback) config.retryCallback = function () { };
+            if (config.retryCallback) config.retryCallback = function () {};
             if (config.closeCallback) config.closeCallback();
         };
 
         var closeAndRetry = function () {
-            config.closeCallback = function () { };
+            config.closeCallback = function () {};
             $("#" + snbid).fadeOut("fast", null, function () {
                 $(this).remove();
             });
@@ -443,7 +443,7 @@ app.factory("snackbar", function () {
 
 app.factory("player", function ($rootScope, appUtils) {
     const {
-        Howl, Howler
+        Howl
     } = require('howler');
     var tmpCurrId = 0;
     var player = {};
@@ -463,16 +463,6 @@ app.factory("player", function ($rootScope, appUtils) {
         player.open(player.currIndex);
     };
 
-    var analyser;
-    var dataArray;
-    var bufferLength;
-    var WIDTH;
-    var HEIGHT;
-    var barWidth;
-    var barHeight;
-    var x;
-    var canvas;
-    var ctx;
     player.open = function (index) {
         if (player.sound) player.sound.unload();
         player.sound = undefined;
@@ -488,48 +478,8 @@ app.factory("player", function ($rootScope, appUtils) {
             }
         });
 
-        canvas = document.getElementById("canvas");
-        ctx = canvas.getContext("2d");
-
-        analyser = Howler.ctx.createAnalyser();
-        Howler.masterGain.connect(analyser);
-        bufferLength = analyser.frequencyBinCount / 8;
-        dataArray = new Uint8Array(bufferLength);
-        analyser.getByteTimeDomainData(dataArray);
-
-        analyser.fftSize = 256;
-        WIDTH = canvas.width;
-        HEIGHT = canvas.height;
-
-        barWidth = (WIDTH / bufferLength) * 2.5;
-
         player.sound.play();
         player.isPlaying = true;
-        renderFrame();
-    };
-
-    var renderFrame = function () {
-        requestAnimationFrame(renderFrame);
-
-        x = 0;
-
-        analyser.getByteFrequencyData(dataArray);
-
-        ctx.fillStyle = "#000";
-        ctx.fillRect(0, 0, WIDTH, HEIGHT);
-
-        for (var i = 0; i < bufferLength; i++) {
-            barHeight = dataArray[i];
-
-            var r = barHeight + (25 * (i / bufferLength));
-            var g = 250 * (i / bufferLength);
-            var b = 50;
-
-            ctx.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
-            ctx.fillRect(x, HEIGHT - barHeight, barWidth, barHeight);
-
-            x += barWidth + 1;
-        }
     };
 
     player.playPause = function () {
@@ -597,6 +547,103 @@ app.factory("player", function ($rootScope, appUtils) {
     }
 
     return player;
+});
+
+app.factory("visualizer", function () {
+    const {
+        Howler
+    } = require('howler');
+
+    var obj = {};
+
+    var analyser;
+    var dataArray;
+    var bufferLength;
+    var WIDTH;
+    var HEIGHT;
+    var barWidth;
+    var barHeight;
+    var x;
+    var canvas;
+    var ctx;
+    obj.start = function () {
+        if (Howler.ctx) {
+            canvas = document.getElementById("canvas");
+            ctx = canvas.getContext("2d");
+
+            analyser = Howler.ctx.createAnalyser();
+            Howler.masterGain.connect(analyser);
+            bufferLength = analyser.frequencyBinCount / 8;
+            dataArray = new Uint8Array(bufferLength);
+            analyser.getByteTimeDomainData(dataArray);
+
+            analyser.fftSize = 256;
+            WIDTH = canvas.width;
+            HEIGHT = canvas.height;
+
+            barWidth = (WIDTH / bufferLength) * 2.5;
+            renderFrame();
+        }
+    };
+
+    var renderFrame = function () {
+        requestAnimationFrame(renderFrame);
+
+        x = 0;
+
+        analyser.getByteFrequencyData(dataArray);
+
+        ctx.fillStyle = "#000";
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+        for (var i = 0; i < bufferLength; i++) {
+            barHeight = dataArray[i];
+
+            var r = barHeight + (25 * (i / bufferLength));
+            var g = 250 * (i / bufferLength);
+            var b = 50;
+
+            ctx.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
+            ctx.fillRect(x, HEIGHT - barHeight, barWidth, barHeight);
+
+            x += barWidth + 1;
+        }
+    };
+
+    // var analyser, buffLen, barWidth, dataArray, ctx;
+    // obj.start = function () {
+    //     analyser = Howler.ctx.createAnalyser();
+    //     Howler.masterGain.connect(analyser);
+    //     buffLen = analyser.frequencyBinCount;
+    //     dataArray = new Uint8Array(buffLen);
+    //     analyser.getByteTimeDomainData(dataArray);
+    //     analyser.fftSize = 256;
+
+    //     var canvas = document.getElementById("canvas");
+    //     ctx = canvas.getContext("2d");
+    //     barWidth = canvas.width / (buffLen) * 2.5;
+    //     console.log(barWidth);
+    //     ctx.fillStyle = "black";
+    //     ctx.strokeStyle = "white";
+    //     ctx.lineCap = "round";
+    //     ctx.lineWidth = barWidth;
+
+    //     draw();
+    // };
+
+    // draw = function () {
+    //     ctx.fillRect(0, 0, 500, 180);
+    //     analyser.getByteFrequencyData(dataArray);
+    //     for (var i = 0; i < buffLen; i++) {
+    //         ctx.beginPath();
+    //         ctx.moveTo(4 + 2 * i * barWidth + barWidth / 2, 178 - barWidth / 2);
+    //         ctx.lineTo(4 + 2 * i * barWidth + barWidth / 2, 178 - dataArray[i] * 0.65 - barWidth / 2);
+    //         ctx.stroke();
+
+    //     }
+    //     requestAnimationFrame(draw);
+    // }
+    return obj;
 });
 //#endregion factories
 
